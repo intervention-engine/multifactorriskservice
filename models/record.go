@@ -50,7 +50,8 @@ func (r *Record) IsRiskFactorsComplete() bool {
 		r.PsychosocialRisk != "" && r.UtilizationRisk != "" && r.PerceivedRisk != ""
 }
 
-// ToPie converts the record to the Intervention Engine pie format used for identifying risk components
+// ToPie converts the record to the Intervention Engine pie format used for identifying risk components.  If the record
+// doesn't have complete risk factors, it will result in an error.
 func (r *Record) ToPie() (pie *plugin.Pie, err error) {
 	if !r.IsRiskFactorsComplete() {
 		return nil, errors.New("Cannot create a pie with incomplete risk factors")
@@ -83,6 +84,27 @@ func (r *Record) ToPie() (pie *plugin.Pie, err error) {
 	pie.Slices = []plugin.Slice{*crSlice, *frSlice, *prSlice, *urSlice}
 
 	return pie, nil
+}
+
+// ToRiskServiceCalculationResult converts the record to a RiskServiceCalculationResult.  If the record doesn't have
+// complete risk factors, it will result in an error.
+func (r *Record) ToRiskServiceCalculationResult() (result *plugin.RiskServiceCalculationResult, err error) {
+	pie, err := r.ToPie()
+	if err != nil {
+		return nil, err
+	}
+	result = new(plugin.RiskServiceCalculationResult)
+	result.AsOf, err = r.RiskFactorDateTime()
+	if err != nil {
+		return nil, err
+	}
+	result.Pie = pie
+	for i := range pie.Slices {
+		if result.Score == nil || *result.Score < pie.Slices[i].Value {
+			result.Score = &pie.Slices[i].Value
+		}
+	}
+	return result, nil
 }
 
 func newSlice(name string, score string) (slice *plugin.Slice, err error) {

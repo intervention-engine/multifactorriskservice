@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/intervention-engine/riskservice/plugin"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -20,7 +21,7 @@ type RecordSuite struct {
 	Records []Record
 }
 
-func (suite *RecordSuite) SetupSuite() {
+func (suite *RecordSuite) SetupTest() {
 	require := suite.Require()
 
 	data, err := ioutil.ReadFile("../fixtures/example_records.json")
@@ -148,11 +149,38 @@ func (suite *RecordSuite) TestIsRiskFactorsComplete() {
 }
 
 func (suite *RecordSuite) TestToPie() {
+	pie, err := suite.Records[0].ToPie()
+	suite.Require().NoError(err)
+	suite.assertPieForRecord0(pie)
+}
+
+func (suite *RecordSuite) TestIncompleteRiskFactorsToPie() {
+	assert := suite.Assert()
+
+	record := suite.Records[0]
+	record.RiskFactorsComplete = ""
+	pie, err := record.ToPie()
+	assert.Nil(pie)
+	assert.Error(err)
+}
+
+func (suite *RecordSuite) TestToRiskServiceCalculationResult() {
 	assert := suite.Assert()
 	require := suite.Require()
 
-	pie, err := suite.Records[0].ToPie()
+	result, err := suite.Records[0].ToRiskServiceCalculationResult()
 	require.NoError(err)
+	require.NotNil(result)
+	assert.Equal(time.Date(2015, time.December, 7, 0, 0, 0, 0, time.Local), result.AsOf)
+	assert.Equal(3, *result.Score)
+	assert.Nil(result.ProbabilityDecimal)
+	suite.assertPieForRecord0(result.Pie)
+}
+
+func (suite *RecordSuite) assertPieForRecord0(pie *plugin.Pie) {
+	assert := suite.Assert()
+	require := suite.Require()
+
 	require.NotNil(pie)
 	assert.True(!pie.Created.IsZero(), "Created time should not be zero time")
 	assert.NotEmpty(pie.Id.Hex())
@@ -170,14 +198,4 @@ func (suite *RecordSuite) TestToPie() {
 	assert.Equal(1, pie.Slices[2].Value)
 	assert.Equal("Utilization Risk", pie.Slices[3].Name)
 	assert.Equal(3, pie.Slices[3].Value)
-}
-
-func (suite *RecordSuite) TestIncompleteRiskFactorsToPie() {
-	assert := suite.Assert()
-
-	record := suite.Records[0]
-	record.RiskFactorsComplete = ""
-	pie, err := record.ToPie()
-	assert.Nil(pie)
-	assert.Error(err)
 }

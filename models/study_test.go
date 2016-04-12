@@ -140,17 +140,19 @@ func (suite *StudySuite) TestToRiskServiceCalculationResults() {
 	study := new(Study)
 	study.AddRecord(suite.Records[0])
 	study.AddRecord(suite.Records[1])
-	results := study.ToRiskServiceCalculationResults()
+	results := study.ToRiskServiceCalculationResults("http://fhir/Patient/1")
 
 	require.Len(results, 2)
 	assert.Equal(time.Date(2015, time.December, 7, 0, 0, 0, 0, time.Local), results[0].AsOf)
 	assert.Equal(3, *results[0].Score)
 	assert.Nil(results[0].ProbabilityDecimal)
 	assert.NotNil(results[0].Pie)
+	assert.Equal(results[0].Pie.Patient, "http://fhir/Patient/1")
 	assert.Equal(time.Date(2016, time.April, 1, 0, 0, 0, 0, time.Local), results[1].AsOf)
 	assert.Equal(4, *results[1].Score)
 	assert.Nil(results[1].ProbabilityDecimal)
 	assert.NotNil(results[1].Pie)
+	assert.Equal(results[1].Pie.Patient, "http://fhir/Patient/1")
 }
 
 func (suite *StudySuite) TestToRiskServiceCalculationResultsSortsByDate() {
@@ -160,17 +162,19 @@ func (suite *StudySuite) TestToRiskServiceCalculationResultsSortsByDate() {
 	study := new(Study)
 	study.AddRecord(suite.Records[1])
 	study.AddRecord(suite.Records[0])
-	results := study.ToRiskServiceCalculationResults()
+	results := study.ToRiskServiceCalculationResults("http://fhir/Patient/1")
 
 	require.Len(results, 2)
 	assert.Equal(time.Date(2015, time.December, 7, 0, 0, 0, 0, time.Local), results[0].AsOf)
 	assert.Equal(3, *results[0].Score)
 	assert.Nil(results[0].ProbabilityDecimal)
 	assert.NotNil(results[0].Pie)
+	assert.Equal(results[0].Pie.Patient, "http://fhir/Patient/1")
 	assert.Equal(time.Date(2016, time.April, 1, 0, 0, 0, 0, time.Local), results[1].AsOf)
 	assert.Equal(4, *results[1].Score)
 	assert.Nil(results[1].ProbabilityDecimal)
 	assert.NotNil(results[1].Pie)
+	assert.Equal(results[1].Pie.Patient, "http://fhir/Patient/1")
 }
 
 func (suite *StudySuite) TestToRiskServiceCalculationResultsIgnoresIncompletes() {
@@ -183,13 +187,14 @@ func (suite *StudySuite) TestToRiskServiceCalculationResultsIgnoresIncompletes()
 	incomplete.RiskFactorsComplete = ""
 	study.AddRecord(incomplete)
 	assert.Len(study.Records, 2)
-	results := study.ToRiskServiceCalculationResults()
+	results := study.ToRiskServiceCalculationResults("http://fhir/Patient/1")
 
 	require.Len(results, 1)
 	assert.Equal(time.Date(2015, time.December, 7, 0, 0, 0, 0, time.Local), results[0].AsOf)
 	assert.Equal(3, *results[0].Score)
 	assert.Nil(results[0].ProbabilityDecimal)
 	assert.NotNil(results[0].Pie)
+	assert.Equal(results[0].Pie.Patient, "http://fhir/Patient/1")
 }
 
 func (suite *StudySuite) TestStudyMapAddRecord() {

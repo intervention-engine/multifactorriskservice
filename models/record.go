@@ -50,9 +50,10 @@ func (r *Record) IsRiskFactorsComplete() bool {
 		r.PsychosocialRisk != "" && r.UtilizationRisk != "" && r.PerceivedRisk != ""
 }
 
-// ToPie converts the record to the Intervention Engine pie format used for identifying risk components.  If the record
-// doesn't have complete risk factors, it will result in an error.
-func (r *Record) ToPie() (pie *plugin.Pie, err error) {
+// ToPie converts the record to the Intervention Engine pie format used for identifying risk components.  The
+// corresponding patientURL must be passed in so the risk pie can be assiocated to the patient on the FHIR server.  If
+// the record doesn't have complete risk factors, it will result in an error.
+func (r *Record) ToPie(patientURL string) (pie *plugin.Pie, err error) {
 	if !r.IsRiskFactorsComplete() {
 		return nil, errors.New("Cannot create a pie with incomplete risk factors")
 	}
@@ -60,6 +61,7 @@ func (r *Record) ToPie() (pie *plugin.Pie, err error) {
 	pie = new(plugin.Pie)
 	pie.Id = bson.NewObjectId()
 	pie.Created = time.Now()
+	pie.Patient = patientURL
 
 	crSlice, err := newSlice("Clinical Risk", r.ClinicalRisk)
 	if err != nil {
@@ -86,10 +88,11 @@ func (r *Record) ToPie() (pie *plugin.Pie, err error) {
 	return pie, nil
 }
 
-// ToRiskServiceCalculationResult converts the record to a RiskServiceCalculationResult.  If the record doesn't have
+// ToRiskServiceCalculationResult converts the record to a RiskServiceCalculationResult.  The corresponding patientURL
+// must be passed in so the risk pie can be assiocated to the patient on the FHIR server.  If the record doesn't have
 // complete risk factors, it will result in an error.
-func (r *Record) ToRiskServiceCalculationResult() (result *plugin.RiskServiceCalculationResult, err error) {
-	pie, err := r.ToPie()
+func (r *Record) ToRiskServiceCalculationResult(patientURL string) (result *plugin.RiskServiceCalculationResult, err error) {
+	pie, err := r.ToPie(patientURL)
 	if err != nil {
 		return nil, err
 	}

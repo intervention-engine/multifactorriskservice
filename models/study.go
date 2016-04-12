@@ -41,11 +41,12 @@ func (s *Study) AddRecord(r Record) error {
 
 // ToRiskServiceCalculationResults converts the records to RiskServiceCalculationResults and returns them sorted
 // by the AsOf date.  Note that the size of the resulting list may be smaller than the size of the record list since
-// some records may represent incomplete risk factors.
-func (s *Study) ToRiskServiceCalculationResults() []plugin.RiskServiceCalculationResult {
+// some records may represent incomplete risk factors.  The corresponding patientURL must be passed in so the risk pie
+// can be assiocated to the patient on the FHIR server.
+func (s *Study) ToRiskServiceCalculationResults(patientURL string) []plugin.RiskServiceCalculationResult {
 	var results []plugin.RiskServiceCalculationResult
 	for i := range s.Records {
-		if result, err := s.Records[i].ToRiskServiceCalculationResult(); err == nil {
+		if result, err := s.Records[i].ToRiskServiceCalculationResult(patientURL); err == nil {
 			results = append(results, *result)
 		}
 	}

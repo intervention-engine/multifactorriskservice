@@ -8,6 +8,8 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/robfig/cron"
+
 	"gopkg.in/mgo.v2"
 
 	"gitlab.mitre.org/intervention-engine/redcap-riskservice/server"
@@ -19,6 +21,7 @@ func main() {
 	fhirAddr := flag.String("fhir", "", "FHIR API address (required, example: \"http://fhirsrv:3001\")")
 	redcapAddr := flag.String("redcap", "", "REDCap API address (required, example: \"http://redcapsrv:80\")")
 	token := flag.String("token", "", "REDCap API token (required)")
+	cronSpec := flag.String("cron", "0 0 22 * * *", "Cron expression indicating when risk assessments should be automatically refreshed")
 	flag.Parse()
 
 	if *fhirAddr == "" || *redcapAddr == "" || *token == "" {
@@ -41,16 +44,27 @@ func main() {
 	}
 	defer session.Close()
 	db := session.DB("riskservice")
+	pieCollection := db.C("pies")
 
 	// Get own endpoint address, falling back to discovery if needed
 	endpoint := *httpAddr
 	if strings.HasPrefix(endpoint, ":") {
 		endpoint = discoverSelf()
 	}
+	basisPieURL := endpoint + "/pies/"
+
+	// Setup the cron job and start the scheduler
+	c := cron.New()
+	err = server.ScheduleRefreshRiskAssessmentsCron(c, *cronSpec, *fhirAddr, *redcapAddr, *token, pieCollection, basisPieURL)
+	if err != nil {
+		panic("Can't setup cron job for refreshing risk assessments.  Specified spec: " + *cronSpec)
+	}
+	c.Start()
+	defer c.Stop()
 
 	// Create the gin engine, register the routes, and run!
 	e := gin.Default()
-	server.RegisterRoutes(e, db, endpoint, *fhirAddr, *redcapAddr, *token)
+	server.RegisterRoutes(e, *fhirAddr, *redcapAddr, *token, pieCollection, basisPieURL)
 	e.Run(*httpAddr)
 }
 

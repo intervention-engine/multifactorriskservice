@@ -22,7 +22,6 @@ import (
 	fhir "github.com/intervention-engine/fhir/models"
 	"github.com/intervention-engine/fhir/server"
 	"github.com/intervention-engine/riskservice/plugin"
-	"github.com/pebbe/util"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -67,10 +66,10 @@ func (suite *FHIRClientSuite) SetupTest() {
 
 	// Add the patients to the database
 	data, err := os.Open("../fixtures/patients_bundle.json")
-	util.CheckErr(err)
+	require.NoError(err)
 	defer data.Close()
 	res, err := http.Post(suite.Server.URL+"/", "application/json", data)
-	util.CheckErr(err)
+	require.NoError(err)
 	defer res.Body.Close()
 
 	// Load the studies to post

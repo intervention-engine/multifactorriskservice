@@ -4,8 +4,9 @@
 	"GodepVersion": "v60",
 	"Packages": [
 		"gitlab.mitre.org/intervention-engine/redcap-riskservice",
+		"gitlab.mitre.org/intervention-engine/redcap-riskservice/client",
 		"gitlab.mitre.org/intervention-engine/redcap-riskservice/models",
-		"gitlab.mitre.org/intervention-engine/redcap-riskservice/service"
+		"gitlab.mitre.org/intervention-engine/redcap-riskservice/server"
 	],
 	"Deps": [
 		{
@@ -61,6 +62,11 @@
 		{
 			"ImportPath": "github.com/pmezard/go-difflib/difflib",
 			"Rev": "792786c7400a136282c1664665ae0a8db921c6c2"
+		},
+		{
+			"ImportPath": "github.com/robfig/cron",
+			"Comment": "v1-16-g0f39cf7",
+			"Rev": "0f39cf7ebc65a602f45692f9894bd6a193faf8fa"
 		},
 		{
 			"ImportPath": "github.com/stretchr/testify/assert",

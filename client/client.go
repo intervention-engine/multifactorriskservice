@@ -3,6 +3,7 @@ package client
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -122,6 +123,7 @@ func PostRiskAssessments(fhirEndpoint string, studies models.StudyMap, pieCollec
 		}
 		results = append(results, result)
 	}
+
 	return results
 }
 
@@ -153,4 +155,18 @@ func (r *Result) MarshalJSON() ([]byte, error) {
 		RiskAssessmentCount: r.RiskAssessmentCount,
 		Error:               errString,
 	})
+}
+
+// LogResultSummary prints out a log of the result summary (# patients, # errors, # assessments)
+func LogResultSummary(results []Result) {
+	// Log out some information
+	var numErrors, numAssessments int
+	for _, result := range results {
+		if result.Error != nil {
+			numErrors++
+		}
+		numAssessments += result.RiskAssessmentCount
+	}
+	log.Printf("Refreshed risk assessments for %d patients: %d errors, %d risk assessments.",
+		len(results), numErrors, numAssessments)
 }

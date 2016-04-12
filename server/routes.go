@@ -11,9 +11,7 @@ import (
 )
 
 // RegisterRoutes sets up the http request handlers with Gin
-func RegisterRoutes(e *gin.Engine, db *mgo.Database, endpoint, fhirEndpoint, redcapEndpoint, redcapToken string) {
-	pieCollection := db.C("pies")
-
+func RegisterRoutes(e *gin.Engine, fhirEndpoint, redcapEndpoint, redcapToken string, pieCollection *mgo.Collection, basisPieURL string) {
 	e.GET("/pies/:id", func(c *gin.Context) {
 		pie := &plugin.Pie{}
 		id := c.Param("id")
@@ -31,11 +29,12 @@ func RegisterRoutes(e *gin.Engine, db *mgo.Database, endpoint, fhirEndpoint, red
 	})
 
 	e.POST("/refresh", func(c *gin.Context) {
-		results, err := client.RefreshRiskAssessments(fhirEndpoint, redcapEndpoint, redcapToken, pieCollection, endpoint+"/pies/")
+		results, err := client.RefreshRiskAssessments(fhirEndpoint, redcapEndpoint, redcapToken, pieCollection, basisPieURL)
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
+		client.LogResultSummary(results)
 		c.JSON(http.StatusOK, results)
 	})
 }

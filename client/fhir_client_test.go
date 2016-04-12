@@ -1,7 +1,8 @@
-package service
+package client
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -102,8 +103,24 @@ func (suite *FHIRClientSuite) TestPostRiskAssessments() {
 
 	// Post the studies as risk assessments
 	piesCollection := suite.Database.C("pies")
-	errMap := PostRiskAssessments(suite.Server.URL, suite.Studies, piesCollection, suite.Server.URL+"/pies")
-	assert.Len(errMap, 0)
+	results := PostRiskAssessments(suite.Server.URL, suite.Studies, piesCollection, suite.Server.URL+"/pies")
+	assert.Len(results, 2)
+
+	// Check the results
+	assert.Contains(results, Result{
+		StudyID:             "1",
+		MedicalRecordNumber: "1-1",
+		FHIRPatientID:       "56fd63cdac1c5d77f6f695a1",
+		RiskAssessmentCount: 2,
+		Error:               nil,
+	})
+	assert.Contains(results, Result{
+		StudyID:             "a",
+		MedicalRecordNumber: "1-a",
+		FHIRPatientID:       "56fd63cdac1c5d77f6f695a2",
+		RiskAssessmentCount: 1,
+		Error:               nil,
+	})
 
 	// Check we have the right number of risk assessments
 	raCollection := suite.Database.C("riskassessments")
@@ -140,13 +157,24 @@ func (suite *FHIRClientSuite) TestPostRiskAssessmentsWithUnfoundMRN() {
 
 	// Post the studies as risk assessments
 	piesCollection := suite.Database.C("pies")
-	errMap := PostRiskAssessments(suite.Server.URL, suite.Studies, piesCollection, suite.Server.URL+"/pies")
+	results := PostRiskAssessments(suite.Server.URL, suite.Studies, piesCollection, suite.Server.URL+"/pies")
+	assert.Len(results, 2)
 
-	// There should be one error corresponding to study ID 1-a
-	assert.Len(errMap, 1)
-	err, ok := errMap["a"]
-	assert.True(ok, "errMap should have entry for 'a'")
-	assert.EqualError(err, "Couldn't find patient with MRN FOO for Study ID a")
+	// Check the results
+	assert.Contains(results, Result{
+		StudyID:             "1",
+		MedicalRecordNumber: "1-1",
+		FHIRPatientID:       "56fd63cdac1c5d77f6f695a1",
+		RiskAssessmentCount: 2,
+		Error:               nil,
+	})
+	assert.Contains(results, Result{
+		StudyID:             "a",
+		MedicalRecordNumber: "FOO",
+		FHIRPatientID:       "",
+		RiskAssessmentCount: 0,
+		Error:               errors.New("Couldn't find patient with MRN FOO for Study ID a"),
+	})
 
 	// Check we have the right number of risk assessments
 	raCollection := suite.Database.C("riskassessments")

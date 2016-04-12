@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
+	"gitlab.mitre.org/intervention-engine/redcap-riskservice/client"
 	"gitlab.mitre.org/intervention-engine/redcap-riskservice/models"
-	"gitlab.mitre.org/intervention-engine/redcap-riskservice/service"
 
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -112,11 +112,27 @@ func (suite *RoutesSuite) TestRefresh() {
 	require.NoError(err)
 	defer res.Body.Close()
 	assert.Equal(http.StatusOK, res.StatusCode)
-	result := make(map[string]map[string]string)
+	var results []client.Result
 	decoder := json.NewDecoder(res.Body)
-	err = decoder.Decode(&result)
+	err = decoder.Decode(&results)
 	require.NoError(err)
-	assert.Len(result, 0)
+
+	// Check the results
+	assert.Len(results, 2)
+	assert.Contains(results, client.Result{
+		StudyID:             "1",
+		MedicalRecordNumber: "1-1",
+		FHIRPatientID:       "56fd63cdac1c5d77f6f695a1",
+		RiskAssessmentCount: 2,
+		Error:               nil,
+	})
+	assert.Contains(results, client.Result{
+		StudyID:             "a",
+		MedicalRecordNumber: "1-a",
+		FHIRPatientID:       "56fd63cdac1c5d77f6f695a2",
+		RiskAssessmentCount: 1,
+		Error:               nil,
+	})
 
 	// Check we have the right number of risk assessments
 	raCollection := suite.Database.C("riskassessments")
@@ -142,7 +158,7 @@ func (suite *RoutesSuite) TestGetPie() {
 	pie.Created = pieTime
 	pie.Patient = suite.FHIRServer.URL + "/Patient/56fd63cdac1c5d77f6f695a1"
 	pie.Slices = make([]plugin.Slice, 4)
-	copy(pie.Slices, service.REDCapRiskServiceConfig.DefaultPieSlices)
+	copy(pie.Slices, client.REDCapRiskServiceConfig.DefaultPieSlices)
 	pie.Slices[0].Value = 1
 	pie.Slices[1].Value = 2
 	pie.Slices[2].Value = 3

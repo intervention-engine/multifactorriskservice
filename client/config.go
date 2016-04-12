@@ -1,4 +1,4 @@
-package service
+package client
 
 import (
 	"github.com/intervention-engine/fhir/models"

@@ -1,12 +1,11 @@
 package server
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/intervention-engine/riskservice/plugin"
-	"gitlab.mitre.org/intervention-engine/redcap-riskservice/service"
+	"gitlab.mitre.org/intervention-engine/redcap-riskservice/client"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -32,20 +31,11 @@ func RegisterRoutes(e *gin.Engine, db *mgo.Database, endpoint, fhirEndpoint, red
 	})
 
 	e.POST("/refresh", func(c *gin.Context) {
-		studies, err := service.GetREDCapData(redcapEndpoint, redcapToken)
+		results, err := client.RefreshRiskAssessments(fhirEndpoint, redcapEndpoint, redcapToken, pieCollection, endpoint+"/pies/")
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
-		errMap := service.PostRiskAssessments(fhirEndpoint, studies, pieCollection, endpoint+"/pies/")
-		result := make(map[string]map[string]string)
-		if len(errMap) > 0 {
-			result["errors"] = make(map[string]string)
-			for id, err := range errMap {
-				log.Println(err.Error())
-				result["errors"][id] = err.Error()
-			}
-		}
-		c.JSON(http.StatusOK, result)
+		c.JSON(http.StatusOK, results)
 	})
 }

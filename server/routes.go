@@ -12,6 +12,12 @@ import (
 
 // RegisterRoutes sets up the http request handlers with Gin
 func RegisterRoutes(e *gin.Engine, fhirEndpoint, redcapEndpoint, redcapToken string, pieCollection *mgo.Collection, basisPieURL string) {
+	RegisterPieHandler(e, pieCollection)
+    RegisterRefreshHandler(e, fhirEndpoint, redcapEndpoint, redcapToken, pieCollection, basisPieURL)
+}
+
+// RegisterPieHandler registers the handler to return pies from the database
+func RegisterPieHandler(e *gin.Engine, pieCollection *mgo.Collection) {
 	e.GET("/pies/:id", func(c *gin.Context) {
 		pie := &plugin.Pie{}
 		id := c.Param("id")
@@ -27,7 +33,10 @@ func RegisterRoutes(e *gin.Engine, fhirEndpoint, redcapEndpoint, redcapToken str
 		}
 		return
 	})
+}
 
+// RegisterRefreshHandler registers the handler to refresh risk assessments from REDCap
+func RegisterRefreshHandler(e *gin.Engine, fhirEndpoint, redcapEndpoint, redcapToken string, pieCollection *mgo.Collection, basisPieURL string) {
 	e.POST("/refresh", func(c *gin.Context) {
 		results, err := client.RefreshRiskAssessments(fhirEndpoint, redcapEndpoint, redcapToken, pieCollection, basisPieURL)
 		if err != nil {

@@ -114,12 +114,14 @@ func (suite *CronSuite) TestCron() {
 	raCollection := suite.Database.C("riskassessments")
 	count, err := raCollection.Find(bson.M{"method.coding.code": "REDCap"}).Count()
 	require.NoError(err)
-	assert.Equal(count, 0)
+	assert.Equal(0, count)
 
-	time.Sleep(1500 * time.Millisecond)
-
-	// Wait then check again
-	count, err = raCollection.Find(bson.M{"method.coding.code": "REDCap"}).Count()
-	require.NoError(err)
-	assert.Equal(count, 3)
+	// Check for updated count every 500 ms for a total of 10s, then give up.
+	// This helps account for slow machines.
+	for i := 0; i < 20 && count != 3; i++ {
+		time.Sleep(500 * time.Millisecond)
+		count, err = raCollection.Find(bson.M{"method.coding.code": "REDCap"}).Count()
+		require.NoError(err)
+	}
+	assert.Equal(3, count)
 }

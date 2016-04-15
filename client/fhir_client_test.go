@@ -123,7 +123,7 @@ func (suite *FHIRClientSuite) TestPostRiskAssessments() {
 
 	// Check we have the right number of risk assessments
 	raCollection := suite.Database.C("riskassessments")
-	count, err := raCollection.Find(bson.M{"method.coding.code": "REDCap"}).Count()
+	count, err := raCollection.Find(bson.M{"method.coding.code": "MultiFactor"}).Count()
 	require.NoError(err)
 	assert.Equal(count, 3)
 
@@ -134,7 +134,7 @@ func (suite *FHIRClientSuite) TestPostRiskAssessments() {
 
 	// Get the risk assessments
 	var ras []fhir.RiskAssessment
-	err = raCollection.Find(bson.M{"method.coding.code": "REDCap"}).Sort("date.time").All(&ras)
+	err = raCollection.Find(bson.M{"method.coding.code": "MultiFactor"}).Sort("date.time").All(&ras)
 	require.NoError(err)
 
 	// Check risk assessments and pies
@@ -177,7 +177,7 @@ func (suite *FHIRClientSuite) TestPostRiskAssessmentsWithUnfoundMRN() {
 
 	// Check we have the right number of risk assessments
 	raCollection := suite.Database.C("riskassessments")
-	count, err := raCollection.Find(bson.M{"method.coding.code": "REDCap"}).Count()
+	count, err := raCollection.Find(bson.M{"method.coding.code": "MultiFactor"}).Count()
 	require.NoError(err)
 	assert.Equal(count, 2)
 
@@ -188,7 +188,7 @@ func (suite *FHIRClientSuite) TestPostRiskAssessmentsWithUnfoundMRN() {
 
 	// Get the risk assessments
 	var ras []fhir.RiskAssessment
-	err = raCollection.Find(bson.M{"method.coding.code": "REDCap"}).Sort("date.time").All(&ras)
+	err = raCollection.Find(bson.M{"method.coding.code": "MultiFactor"}).Sort("date.time").All(&ras)
 	require.NoError(err)
 
 	// Check risk assessments and pies
@@ -202,10 +202,10 @@ func (suite *FHIRClientSuite) checkRiskAssessment(ra *fhir.RiskAssessment, patie
 	assert := suite.Assert()
 
 	assert.Equal("Patient/"+patientID, ra.Subject.Reference)
-	assert.True(ra.Method.MatchesCode("http://interventionengine.org/risk-assessments", "REDCap"))
+	assert.True(ra.Method.MatchesCode("http://interventionengine.org/risk-assessments", "MultiFactor"))
 	assert.True(ra.Date.Time.Equal(date))
 	assert.Len(ra.Prediction, 1)
-	assert.Equal("Unexpected ED/Hospital Visit", ra.Prediction[0].Outcome.Text)
+	assert.Equal("Catastrophic Health Event", ra.Prediction[0].Outcome.Text)
 	assert.Equal(float64(score), *ra.Prediction[0].ProbabilityDecimal)
 	assert.Len(ra.Basis, 1)
 	assert.True(strings.HasPrefix(ra.Basis[0].Reference, suite.Server.URL+"/pies/"))

@@ -112,7 +112,7 @@ func (suite *CronSuite) TestCron() {
 
 	// Check we have no risk assessments yet
 	raCollection := suite.Database.C("riskassessments")
-	count, err := raCollection.Find(bson.M{"method.coding.code": "REDCap"}).Count()
+	count, err := raCollection.Find(bson.M{"method.coding.code": "MultiFactor"}).Count()
 	require.NoError(err)
 	assert.Equal(0, count)
 
@@ -120,7 +120,7 @@ func (suite *CronSuite) TestCron() {
 	// This helps account for slow machines.
 	for i := 0; i < 20 && count != 3; i++ {
 		time.Sleep(500 * time.Millisecond)
-		count, err = raCollection.Find(bson.M{"method.coding.code": "REDCap"}).Count()
+		count, err = raCollection.Find(bson.M{"method.coding.code": "MultiFactor"}).Count()
 		require.NoError(err)
 	}
 	assert.Equal(3, count)

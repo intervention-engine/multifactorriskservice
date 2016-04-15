@@ -136,7 +136,7 @@ func (suite *RoutesSuite) TestRefresh() {
 
 	// Check we have the right number of risk assessments
 	raCollection := suite.Database.C("riskassessments")
-	count, err := raCollection.Find(bson.M{"method.coding.code": "REDCap"}).Count()
+	count, err := raCollection.Find(bson.M{"method.coding.code": "MultiFactor"}).Count()
 	require.NoError(err)
 	assert.Equal(count, 3)
 

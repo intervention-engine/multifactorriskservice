@@ -177,6 +177,12 @@ func (suite *RoutesSuite) TestGetPie() {
 	decoder := json.NewDecoder(res.Body)
 	err = decoder.Decode(&pie2)
 	require.NoError(err)
+
+	// The date can cause issues due to location/timezone, so check that first and then set them equal for the full
+	// pie comparison (I think this was causing failures on travis)
+	if assert.True(pie.Created.Equal(pie2.Created)) {
+		pie2.Created = pie.Created
+	}
 	assert.Equal(pie, pie2)
 }
 

@@ -1,10 +1,11 @@
 {
 	"ImportPath": "github.com/intervention-engine/multifactorriskservice",
 	"GoVersion": "go1.6",
-	"GodepVersion": "v60",
+	"GodepVersion": "v63",
 	"Packages": [
 		"github.com/intervention-engine/multifactorriskservice",
 		"github.com/intervention-engine/multifactorriskservice/client",
+		"github.com/intervention-engine/multifactorriskservice/mock",
 		"github.com/intervention-engine/multifactorriskservice/models",
 		"github.com/intervention-engine/multifactorriskservice/server"
 	],

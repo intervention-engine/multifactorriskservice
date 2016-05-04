@@ -1,12 +1,12 @@
 {
-	"ImportPath": "gitlab.mitre.org/intervention-engine/redcap-riskservice",
+	"ImportPath": "github.com/intervention-engine/multifactorriskservice",
 	"GoVersion": "go1.6",
 	"GodepVersion": "v60",
 	"Packages": [
-		"gitlab.mitre.org/intervention-engine/redcap-riskservice",
-		"gitlab.mitre.org/intervention-engine/redcap-riskservice/client",
-		"gitlab.mitre.org/intervention-engine/redcap-riskservice/models",
-		"gitlab.mitre.org/intervention-engine/redcap-riskservice/server"
+		"github.com/intervention-engine/multifactorriskservice",
+		"github.com/intervention-engine/multifactorriskservice/client",
+		"github.com/intervention-engine/multifactorriskservice/models",
+		"github.com/intervention-engine/multifactorriskservice/server"
 	],
 	"Deps": [
 		{

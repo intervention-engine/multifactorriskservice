@@ -13,8 +13,8 @@ import (
 	"sync"
 
 	fhir "github.com/intervention-engine/fhir/models"
+	"github.com/intervention-engine/multifactorriskservice/models"
 	"github.com/intervention-engine/riskservice/service"
-	"gitlab.mitre.org/intervention-engine/redcap-riskservice/models"
 )
 
 var m sync.Mutex

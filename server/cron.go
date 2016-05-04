@@ -3,8 +3,8 @@ package server
 import (
 	"log"
 
+	"github.com/intervention-engine/multifactorriskservice/client"
 	"github.com/robfig/cron"
-	"gitlab.mitre.org/intervention-engine/redcap-riskservice/client"
 	"gopkg.in/mgo.v2"
 )
 

@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"gitlab.mitre.org/intervention-engine/redcap-riskservice/client"
-	"gitlab.mitre.org/intervention-engine/redcap-riskservice/models"
+	"github.com/intervention-engine/multifactorriskservice/client"
+	"github.com/intervention-engine/multifactorriskservice/models"
 
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"

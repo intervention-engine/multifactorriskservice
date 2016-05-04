@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/intervention-engine/multifactorriskservice/client"
 	"github.com/intervention-engine/riskservice/plugin"
-	"gitlab.mitre.org/intervention-engine/redcap-riskservice/client"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -13,7 +13,7 @@ import (
 // RegisterRoutes sets up the http request handlers with Gin
 func RegisterRoutes(e *gin.Engine, fhirEndpoint, redcapEndpoint, redcapToken string, pieCollection *mgo.Collection, basisPieURL string) {
 	RegisterPieHandler(e, pieCollection)
-    RegisterRefreshHandler(e, fhirEndpoint, redcapEndpoint, redcapToken, pieCollection, basisPieURL)
+	RegisterRefreshHandler(e, fhirEndpoint, redcapEndpoint, redcapToken, pieCollection, basisPieURL)
 }
 
 // RegisterPieHandler registers the handler to return pies from the database

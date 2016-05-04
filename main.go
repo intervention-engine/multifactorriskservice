@@ -12,7 +12,7 @@ import (
 
 	"gopkg.in/mgo.v2"
 
-	"gitlab.mitre.org/intervention-engine/redcap-riskservice/server"
+	"github.com/intervention-engine/multifactorriskservice/server"
 )
 
 func main() {

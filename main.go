@@ -31,7 +31,7 @@ func main() {
 	// Prefer mongo arg, falling back to env, falling back to default
 	mongo := *mongoAddr
 	if mongo == "" {
-		mongo := os.Getenv("MONGO_PORT_27017_TCP_ADDR")
+		mongo = os.Getenv("MONGO_PORT_27017_TCP_ADDR")
 		if mongo == "" {
 			mongo = "mongodb://localhost:27017"
 		}

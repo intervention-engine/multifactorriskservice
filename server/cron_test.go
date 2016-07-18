@@ -106,7 +106,7 @@ func (suite *CronSuite) TestCron() {
 
 	// Schedule the cron
 	c := cron.New()
-	err := ScheduleRefreshRiskAssessmentsCron(c, "@every 1s", suite.FHIRServer.URL, suite.REDCapServer.URL, "12345", suite.Database.C("pies"), "http://example.org/pies/")
+	err := ScheduleRefreshRiskAssessmentsCron(c, "@every 1s", suite.FHIRServer.URL, suite.REDCapServer.URL, "12345", suite.Database.C("pies"), "http://example.org/pies/", false)
 	c.Start()
 	defer c.Stop()
 

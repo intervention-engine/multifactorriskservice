@@ -75,7 +75,7 @@ func (suite *RoutesSuite) SetupTest() {
 
 	e := gin.New()
 	suite.Server = httptest.NewServer(e)
-	RegisterRoutes(e, suite.FHIRServer.URL, suite.REDCapServer.URL, "123abc", suite.Database.C("pies"), suite.Server.URL+"/pies/")
+	RegisterRoutes(e, suite.FHIRServer.URL, suite.REDCapServer.URL, "123abc", suite.Database.C("pies"), suite.Server.URL+"/pies/", false)
 }
 
 func (suite *RoutesSuite) TearDownTest() {

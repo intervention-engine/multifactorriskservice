@@ -102,7 +102,7 @@ func (suite *FHIRClientSuite) TestPostRiskAssessments() {
 
 	// Post the studies as risk assessments
 	piesCollection := suite.Database.C("pies")
-	results := PostRiskAssessments(suite.Server.URL, suite.Studies, piesCollection, suite.Server.URL+"/pies")
+	results := PostRiskAssessments(suite.Server.URL, suite.Studies, piesCollection, suite.Server.URL+"/pies", false)
 	assert.Len(results, 2)
 
 	// Check the results
@@ -156,7 +156,7 @@ func (suite *FHIRClientSuite) TestPostRiskAssessmentsWithUnfoundMRN() {
 
 	// Post the studies as risk assessments
 	piesCollection := suite.Database.C("pies")
-	results := PostRiskAssessments(suite.Server.URL, suite.Studies, piesCollection, suite.Server.URL+"/pies")
+	results := PostRiskAssessments(suite.Server.URL, suite.Studies, piesCollection, suite.Server.URL+"/pies", false)
 	assert.Len(results, 2)
 
 	// Check the results

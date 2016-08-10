@@ -9,9 +9,9 @@ import (
 )
 
 // ScheduleRefreshRiskAssessmentsCron schedules a cron job for refreshing the risk assessments
-func ScheduleRefreshRiskAssessmentsCron(c *cron.Cron, spec string, fhirEndpoint, redcapEndpoint, redcapToken string, pieCollection *mgo.Collection, basisPieURL string) error {
+func ScheduleRefreshRiskAssessmentsCron(c *cron.Cron, spec string, fhirEndpoint, redcapEndpoint, redcapToken string, pieCollection *mgo.Collection, basisPieURL string, useStudyID bool) error {
 	return c.AddFunc(spec, func() {
-		results, err := client.RefreshRiskAssessments(fhirEndpoint, redcapEndpoint, redcapToken, pieCollection, basisPieURL)
+		results, err := client.RefreshRiskAssessments(fhirEndpoint, redcapEndpoint, redcapToken, pieCollection, basisPieURL, useStudyID)
 		if err != nil {
 			log.Println("Error refreshing risk assessments", err)
 		} else {

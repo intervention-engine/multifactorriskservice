@@ -20,6 +20,7 @@ func main() {
 	mongoAddr := flag.String("mongo", "", "MongoDB address (default: \"mongodb://localhost:27017\")")
 	fhirAddr := flag.String("fhir", "", "FHIR API address (required, example: \"http://fhirsrv:3001\")")
 	redcapAddr := flag.String("redcap", "", "REDCap API address (required, example: \"http://redcapsrv:80\")")
+	useStudyID := flag.Bool("useStudyID", false, "Use the study ID as the Medical Record Number (default: false)")
 	token := flag.String("token", "", "REDCap API token (required)")
 	cronSpec := flag.String("cron", "0 0 22 * * *", "Cron expression indicating when risk assessments should be automatically refreshed")
 	flag.Parse()
@@ -55,7 +56,7 @@ func main() {
 
 	// Setup the cron job and start the scheduler
 	c := cron.New()
-	err = server.ScheduleRefreshRiskAssessmentsCron(c, *cronSpec, *fhirAddr, *redcapAddr, *token, pieCollection, basisPieURL)
+	err = server.ScheduleRefreshRiskAssessmentsCron(c, *cronSpec, *fhirAddr, *redcapAddr, *token, pieCollection, basisPieURL, *useStudyID)
 	if err != nil {
 		panic("Can't setup cron job for refreshing risk assessments.  Specified spec: " + *cronSpec)
 	}
@@ -64,7 +65,7 @@ func main() {
 
 	// Create the gin engine, register the routes, and run!
 	e := gin.Default()
-	server.RegisterRoutes(e, *fhirAddr, *redcapAddr, *token, pieCollection, basisPieURL)
+	server.RegisterRoutes(e, *fhirAddr, *redcapAddr, *token, pieCollection, basisPieURL, *useStudyID)
 	e.Run(*httpAddr)
 }
 

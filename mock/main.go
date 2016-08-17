@@ -15,7 +15,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	fhir "github.com/intervention-engine/fhir/models"
+	fhirmodels "github.com/intervention-engine/fhir/models"
 	"github.com/intervention-engine/multifactorriskservice/client"
 	"github.com/intervention-engine/multifactorriskservice/models"
 	"github.com/intervention-engine/multifactorriskservice/server"
@@ -24,26 +24,22 @@ import (
 )
 
 func main() {
-	httpAddr := flag.String("http", ":9000", "HTTP service address to listen on")
-	mongoAddr := flag.String("mongo", "", "MongoDB address (default: \"mongodb://localhost:27017\")")
-	fhirAddr := flag.String("fhir", "", "FHIR API address (required, example: \"http://fhirsrv:3001\")")
-	gen := flag.Bool("gen", false, "Flag to indicate that mock risk assessments should be generated immediately")
+	httpFlag := flag.String("http", "", "HTTP service address to listen on (env: HTTP_HOST_AND_PORT, default: \":9000\")")
+	mongoFlag := flag.String("mongo", "", "MongoDB address (env: MONGO_URL, default: \"mongodb://localhost:27017\")")
+	fhirFlag := flag.String("fhir", "", "FHIR API address (env: FHIR_URL, default: \"http://localhost:3001\")")
+	genFlag := flag.Bool("gen", false, "Flag to indicate that mock risk assessments should be generated immediately")
 	flag.Parse()
 
-	if *fhirAddr == "" {
-		flag.PrintDefaults()
-	}
-
-	// Prefer mongo arg, falling back to env, falling back to default
-	mongo := *mongoAddr
-	if mongo == "" {
-		mongo := os.Getenv("MONGO_PORT_27017_TCP_ADDR")
-		if mongo == "" {
-			mongo = "mongodb://localhost:27017"
-		}
-	} else if strings.HasPrefix(mongo, ":") {
+	httpa := getConfigValue(httpFlag, "HTTP_HOST_AND_PORT", ":9000")
+	mongo := getConfigValue(mongoFlag, "MONGO_URL", "mongodb://localhost:27017")
+	if strings.HasPrefix(mongo, ":") {
 		mongo = "mongodb://localhost" + mongo
 	}
+	fhir := getConfigValue(fhirFlag, "FHIR_URL", "http://localhost:3001")
+	if strings.HasPrefix(fhir, ":") {
+		fhir = "http://localhost" + fhir
+	}
+
 	session, err := mgo.Dial(mongo)
 	if err != nil {
 		panic("Can't connect to the database")
@@ -53,25 +49,25 @@ func main() {
 	pieCollection := db.C("pies")
 
 	// Get own endpoint address, falling back to discovery if needed
-	endpoint := *httpAddr
+	endpoint := httpa
 	if strings.HasPrefix(endpoint, ":") {
-		endpoint = discoverSelf()
+		endpoint = discoverSelf() + endpoint
 	}
-	basisPieURL := endpoint + "/pies/"
+	basisPieURL := "http://" + endpoint + "/pies"
 
 	// Create the gin engine, register the routes, and run!
 	e := gin.Default()
-	RegisterMockRoutes(e, *fhirAddr, pieCollection, basisPieURL)
+	RegisterMockRoutes(e, fhir, pieCollection, basisPieURL)
 
-	if *gen {
-		results, err := RefreshMockRiskAssessments(*fhirAddr, pieCollection, basisPieURL)
+	if *genFlag {
+		results, err := RefreshMockRiskAssessments(fhir, pieCollection, basisPieURL)
 		if err != nil {
 			log.Println("Failed to generate mock risk assessments", err)
 		} else {
 			client.LogResultSummary(results)
 		}
 	}
-	e.Run(*httpAddr)
+	e.Run(httpa)
 }
 
 // RegisterMockRoutes sets up the http request handlers for the mock service with Gin
@@ -146,7 +142,7 @@ func getPatientSummariesFromFHIR(fhirEndpoint string) (map[string]patientSummary
 		if res.StatusCode != http.StatusOK {
 			return nil, fmt.Errorf("Received HTTP %d %s from FHIR server when querying for patients.", res.StatusCode, res.Status)
 		}
-		var bundle fhir.Bundle
+		var bundle fhirmodels.Bundle
 		decoder := json.NewDecoder(res.Body)
 		if err := decoder.Decode(&bundle); err != nil {
 			return nil, err
@@ -154,18 +150,18 @@ func getPatientSummariesFromFHIR(fhirEndpoint string) (map[string]patientSummary
 		for _, entry := range bundle.Entry {
 			var sum patientSummary
 			switch t := entry.Resource.(type) {
-			case *fhir.Patient:
+			case *fhirmodels.Patient:
 				sum = pMap[t.Id]
 				sum.ID = t.Id
 				if t.BirthDate != nil {
 					// Approximate age (not perfect, but good enough)
 					sum.Age = int(time.Since(t.BirthDate.Time).Hours() / (24 * 365))
 				}
-			case *fhir.Condition:
+			case *fhirmodels.Condition:
 				sum = pMap[t.Patient.ReferencedID]
 				sum.ID = t.Patient.ReferencedID
 				sum.ConditionCount += sum.ConditionCount
-			case *fhir.MedicationStatement:
+			case *fhirmodels.MedicationStatement:
 				sum = pMap[t.Patient.ReferencedID]
 				sum.ID = t.Patient.ReferencedID
 				sum.MedicationCount += sum.MedicationCount
@@ -322,21 +318,32 @@ func nextScore(previous, low, high string) string {
 	return next
 }
 
+func getConfigValue(parsedFlag *string, envVar string, defaultVal string) string {
+	val := *parsedFlag
+	if val == "" {
+		val = os.Getenv(envVar)
+		if val == "" {
+			val = defaultVal
+		}
+	}
+	return val
+}
+
 func discoverSelf() string {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
 		log.Println("Unable to determine IP address.  Defaulting to localhost.")
-		return "http://localhost:9000"
+		return "localhost"
 	}
 
 	for _, a := range addrs {
 		if ipnet, ok := a.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
 			if ipnet.IP.To4() != nil {
-				return "http://" + ipnet.IP.String() + ":9000"
+				return ipnet.IP.String()
 			}
 		}
 	}
 
 	log.Println("Unable to determine IP address.  Defaulting to localhost.")
-	return "http://localhost:9000"
+	return "localhost"
 }

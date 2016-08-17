@@ -26,7 +26,7 @@ func main() {
 	flag.Parse()
 
 	// Prefer http arg, falling back to env, falling back to default
-	http := getConfigValue(httpFlag, "HTTP_HOST_AND_PORT", ":9000")
+	httpa := getConfigValue(httpFlag, "HTTP_HOST_AND_PORT", ":9000")
 
 	// Prefer mongo arg, falling back to env, falling back to default
 	mongo := getConfigValue(mongoFlag, "MONGO_URL", "mongodb://localhost:27017")
@@ -53,7 +53,7 @@ func main() {
 	pieCollection := db.C("pies")
 
 	// Get own endpoint address, falling back to discovery if needed
-	endpoint := http
+	endpoint := httpa
 	if strings.HasPrefix(endpoint, ":") {
 		endpoint = discoverSelf() + endpoint
 	}
@@ -71,7 +71,7 @@ func main() {
 	// Create the gin engine, register the routes, and run!
 	e := gin.Default()
 	server.RegisterRoutes(e, fhir, redcap, token, pieCollection, basisPieURL, true)
-	e.Run(http)
+	e.Run(httpa)
 }
 
 func getConfigValue(parsedFlag *string, envVar string, defaultVal string) string {

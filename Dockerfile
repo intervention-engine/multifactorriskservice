@@ -8,7 +8,6 @@ ADD . /go/src/github.com/intervention-engine/multifactorriskservice
 WORKDIR /go/src/github.com/intervention-engine/multifactorriskservice
 # Below is for testing only!
 # WORKDIR /go/src/github.com/intervention-engine/multifactorriskservice/mock
-RUN go get
 RUN go build
 
 # Document that the service listens on port 9000.

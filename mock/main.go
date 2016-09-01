@@ -200,9 +200,7 @@ func (p *patientSummary) ToStudy() models.Study {
 		var record models.Record
 		record.StudyID = p.ID
 		record.MedicalRecordNumber = p.ID
-		record.ParticipantInfoComplete = "2"
 		record.RiskFactorDate = d.Format("2006-01-02")
-		record.RiskFactorsComplete = "2"
 		if len(study.Records) == 0 {
 			p.populateInitialRecord(&record)
 		} else {

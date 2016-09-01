@@ -184,7 +184,7 @@ func (suite *StudySuite) TestToRiskServiceCalculationResultsIgnoresIncompletes()
 	study := new(Study)
 	study.AddRecord(suite.Records[0])
 	incomplete := suite.Records[1]
-	incomplete.RiskFactorsComplete = ""
+	incomplete.FunctionalRisk = ""
 	study.AddRecord(incomplete)
 	assert.Len(study.Records, 2)
 	results := study.ToRiskServiceCalculationResults("http://fhir/Patient/1")

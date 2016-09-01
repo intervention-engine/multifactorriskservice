@@ -33,7 +33,7 @@ func (suite *REDCapClientSuite) SetupTest() {
 		assert.Equal("record", r.FormValue("content"))
 		assert.Equal("json", r.FormValue("format"))
 		assert.Equal("flat", r.FormValue("type"))
-		assert.Equal("study_id, redcap_event_name, mrn, participant_information_complete, rf_date, rf_cmc_risk_cat, rf_func_risk_cat, rf_sb_risk_cat, rf_util_risk_cat, rf_risk_predicted, risk_factors_complete", r.FormValue("fields"))
+		assert.Equal("study_id, redcap_event_name, mrn, rf_date, rf_cmc_risk_cat, rf_func_risk_cat, rf_sb_risk_cat, rf_util_risk_cat, rf_risk_predicted", r.FormValue("fields"))
 		assert.Equal("json", r.FormValue("returnFormat"))
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")

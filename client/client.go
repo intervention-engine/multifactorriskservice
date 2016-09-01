@@ -40,7 +40,7 @@ func GetREDCapData(endpoint string, token string) (models.StudyMap, error) {
 	form.Set("format", "json")
 	form.Set("returnFormat", "json")
 	form.Set("type", "flat")
-	form.Set("fields", "study_id, redcap_event_name, mrn, participant_information_complete, rf_date, rf_cmc_risk_cat, rf_func_risk_cat, rf_sb_risk_cat, rf_util_risk_cat, rf_risk_predicted, risk_factors_complete")
+	form.Set("fields", "study_id, redcap_event_name, mrn, rf_date, rf_cmc_risk_cat, rf_func_risk_cat, rf_sb_risk_cat, rf_util_risk_cat, rf_risk_predicted")
 
 	if !strings.HasSuffix(endpoint, "/") {
 		endpoint += "/"

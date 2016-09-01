@@ -61,7 +61,7 @@ func main() {
 
 	// Setup the cron job and start the scheduler
 	c := cron.New()
-	err = server.ScheduleRefreshRiskAssessmentsCron(c, cronSpec, fhir, redcap, token, pieCollection, basisPieURL, true)
+	err = server.ScheduleRefreshRiskAssessmentsCron(c, cronSpec, fhir, redcap, token, pieCollection, basisPieURL)
 	if err != nil {
 		panic("Can't setup cron job for refreshing risk assessments.  Specified spec: " + cronSpec)
 	}
@@ -70,7 +70,7 @@ func main() {
 
 	// Create the gin engine, register the routes, and run!
 	e := gin.Default()
-	server.RegisterRoutes(e, fhir, redcap, token, pieCollection, basisPieURL, true)
+	server.RegisterRoutes(e, fhir, redcap, token, pieCollection, basisPieURL)
 	e.Run(httpa)
 }
 

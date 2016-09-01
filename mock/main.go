@@ -107,7 +107,6 @@ func RefreshMockRiskAssessments(fhirEndpoint string, pieCollection *mgo.Collecti
 		study := sum.ToStudy()
 		result := client.Result{
 			StudyID:             study.ID,
-			MedicalRecordNumber: study.MedicalRecordNumber,
 			FHIRPatientID:       id,
 		}
 		calcResults := study.ToRiskServiceCalculationResults(fhirEndpoint + "/Patient/" + id)
@@ -195,11 +194,9 @@ type patientSummary struct {
 func (p *patientSummary) ToStudy() models.Study {
 	var study models.Study
 	study.ID = p.ID
-	study.MedicalRecordNumber = p.ID
 	for d := time.Date(2014, time.June, 1, 12, 0, 0, 0, time.Local); d.Before(time.Now()); {
 		var record models.Record
 		record.StudyID = p.ID
-		record.MedicalRecordNumber = p.ID
 		record.RiskFactorDate = d.Format("2006-01-02")
 		if len(study.Records) == 0 {
 			p.populateInitialRecord(&record)

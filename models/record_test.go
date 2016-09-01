@@ -36,7 +36,6 @@ func (suite *RecordSuite) TestLoadRecordsFromJSON() {
 	assert.Equal(Record{
 		StudyID:             float64(1),
 		EventName:           "initial_arm_1",
-		MedicalRecordNumber: "1-1",
 		RiskFactorDate:      "2015-12-07",
 		ClinicalRisk:        "3",
 		FunctionalRisk:      "2",
@@ -47,7 +46,6 @@ func (suite *RecordSuite) TestLoadRecordsFromJSON() {
 	assert.Equal(Record{
 		StudyID:             float64(1),
 		EventName:           "visit1_arm_1",
-		MedicalRecordNumber: "",
 		RiskFactorDate:      "2016-04-01",
 		ClinicalRisk:        "3",
 		FunctionalRisk:      "2",
@@ -58,7 +56,6 @@ func (suite *RecordSuite) TestLoadRecordsFromJSON() {
 	assert.Equal(Record{
 		StudyID:             "a",
 		EventName:           "initial_arm_1",
-		MedicalRecordNumber: "1-a",
 		RiskFactorDate:      "2016-02-21",
 		ClinicalRisk:        "1",
 		FunctionalRisk:      "1",

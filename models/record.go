@@ -13,9 +13,8 @@ import (
 
 // Record represents the key info from a REDCap record in the risk stratification project
 type Record struct {
-	StudyID             interface{} `json:"study_id"`
-	EventName           string      `json:"redcap_event_name"`
-	MedicalRecordNumber string      `json:"mrn"`
+	StudyID   interface{} `json:"study_id"`
+	EventName string      `json:"redcap_event_name"`
 
 	RiskFactorDate   string `json:"rf_date"`
 	ClinicalRisk     string `json:"rf_cmc_risk_cat"`

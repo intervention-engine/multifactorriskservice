@@ -9,11 +9,10 @@ import (
 // Study represents a single study / patient, containing all of the records making up the study
 type Study struct {
 	ID                  string
-	MedicalRecordNumber string
 	Records             []Record
 }
 
-// AddRecord adds a record to the study, checking to ensure it has the same ID and MRN (if available)
+// AddRecord adds a record to the study, checking to ensure it has the same Study ID
 func (s *Study) AddRecord(r Record) error {
 	// Make sure the study ID's match, setting the study ID if necessary
 	if r.StudyID != "" {
@@ -21,16 +20,6 @@ func (s *Study) AddRecord(r Record) error {
 			s.ID = r.StudyIDString()
 		} else if s.ID != r.StudyIDString() {
 			return fmt.Errorf("Record with study ID %s cannot be added to study with ID %s", r.StudyID, s.ID)
-		}
-	}
-
-	// Make sure the MRN's match, setting the study MRN if necessary
-	if r.MedicalRecordNumber != "" {
-		if s.MedicalRecordNumber == "" {
-			s.MedicalRecordNumber = r.MedicalRecordNumber
-		} else if s.MedicalRecordNumber != r.MedicalRecordNumber {
-			return fmt.Errorf("Record with MRN %s cannot be added to study with MRN %s", r.MedicalRecordNumber,
-				s.MedicalRecordNumber)
 		}
 	}
 

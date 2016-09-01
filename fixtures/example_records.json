@@ -2,7 +2,6 @@
   {
     "study_id": 1,
     "redcap_event_name": "initial_arm_1",
-    "mrn": "1-1",
     "rf_date": "2015-12-07",
     "rf_cmc_risk_cat": "3",
     "rf_func_risk_cat": "2",
@@ -13,7 +12,6 @@
   {
     "study_id": 1,
     "redcap_event_name": "visit1_arm_1",
-    "mrn": "",
     "rf_date": "2016-04-01",
     "rf_cmc_risk_cat": "3",
     "rf_func_risk_cat": "2",
@@ -24,7 +22,6 @@
   {
     "study_id": "a",
     "redcap_event_name": "initial_arm_1",
-    "mrn": "1-a",
     "rf_date": "2016-02-21",
     "rf_cmc_risk_cat": "1",
     "rf_func_risk_cat": "1",

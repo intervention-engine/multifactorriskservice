@@ -10,7 +10,7 @@
                 "identifier": [
                     {
                         "type": { "coding": [ { "system": "http://hl7.org/fhir/v2/0203", "code": "MR" } ] },
-                        "value": "1-1"
+                        "value": "1"
                     }
                 ],
                 "name": [
@@ -33,7 +33,7 @@
                 "identifier": [
                     {
                         "type": { "coding": [ { "system": "http://hl7.org/fhir/v2/0203", "code": "MR" } ] },
-                        "value": "1-a"
+                        "value": "a"
                     }
                 ],
                 "name": [

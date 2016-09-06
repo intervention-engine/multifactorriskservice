@@ -21,14 +21,14 @@ var m sync.Mutex
 
 // RefreshRiskAssessments pulls the risk assessment data from REDCap and posts it to the FHIR server, replacing older
 // risk assessments and storing pie representations.
-func RefreshRiskAssessments(fhirEndpoint string, redcapEndpoint string, redcapToken string, pieCollection *mgo.Collection, basisPieURL string, useStudyID bool) ([]Result, error) {
+func RefreshRiskAssessments(fhirEndpoint string, redcapEndpoint string, redcapToken string, pieCollection *mgo.Collection, basisPieURL string) ([]Result, error) {
 	m.Lock()
 	defer m.Unlock()
 	studies, err := GetREDCapData(redcapEndpoint, redcapToken)
 	if err != nil {
 		return nil, err
 	}
-	return PostRiskAssessments(fhirEndpoint, studies, pieCollection, basisPieURL, useStudyID), nil
+	return PostRiskAssessments(fhirEndpoint, studies, pieCollection, basisPieURL), nil
 }
 
 // GetREDCapData queries REDCap at the specified endpoint with the specifed token, returning a StudyMap containing
@@ -40,7 +40,7 @@ func GetREDCapData(endpoint string, token string) (models.StudyMap, error) {
 	form.Set("format", "json")
 	form.Set("returnFormat", "json")
 	form.Set("type", "flat")
-	form.Set("fields", "study_id, redcap_event_name, mrn, participant_information_complete, rf_date, rf_cmc_risk_cat, rf_func_risk_cat, rf_sb_risk_cat, rf_util_risk_cat, rf_risk_predicted, risk_factors_complete")
+	form.Set("fields", "study_id, redcap_event_name, rf_date, rf_cmc_risk_cat, rf_func_risk_cat, rf_sb_risk_cat, rf_util_risk_cat, rf_risk_predicted")
 
 	if !strings.HasSuffix(endpoint, "/") {
 		endpoint += "/"
@@ -67,19 +67,14 @@ func GetREDCapData(endpoint string, token string) (models.StudyMap, error) {
 
 // PostRiskAssessments posts the risk assessments from the studies to the FHIR server and also stores the risk pies
 // to the local Mongo database
-func PostRiskAssessments(fhirEndpoint string, studies models.StudyMap, pieCollection *mgo.Collection, basisPieURL string, useStudyID bool) []Result {
+func PostRiskAssessments(fhirEndpoint string, studies models.StudyMap, pieCollection *mgo.Collection, basisPieURL string) []Result {
 	results := make([]Result, 0, len(studies))
 	for _, study := range studies {
-		mrn := study.MedicalRecordNumber
-		if useStudyID {
-			mrn = study.ID
-		}
 		result := Result{
-			StudyID:             study.ID,
-			MedicalRecordNumber: mrn,
+			StudyID: study.ID,
 		}
-		// Query the FHIR server to find the patient ID by MRN
-		r, err := http.NewRequest("GET", fhirEndpoint+"/Patient?identifier="+mrn, nil)
+		// Query the FHIR server to find the patient ID by the Study ID (often the MRN)
+		r, err := http.NewRequest("GET", fhirEndpoint+"/Patient?identifier="+study.ID, nil)
 		if err != nil {
 			result.Error = fmt.Errorf("Couldn't create HTTP request for querying patient with Study ID: %s.  Error: %s", study.ID, err.Error())
 			results = append(results, result)
@@ -106,11 +101,11 @@ func PostRiskAssessments(fhirEndpoint string, studies models.StudyMap, pieCollec
 			continue
 		}
 		if len(patients.Entry) == 0 {
-			result.Error = fmt.Errorf("Couldn't find patient with MRN %s for Study ID %s", mrn, study.ID)
+			result.Error = fmt.Errorf("Couldn't find patient with Study ID %s", study.ID)
 			results = append(results, result)
 			continue
 		} else if len(patients.Entry) > 1 {
-			result.Error = fmt.Errorf("Found too many patients (%d) with MRN %s for Study ID %s", len(patients.Entry), mrn, study.ID)
+			result.Error = fmt.Errorf("Found too many patients (%d) with Study ID %s", len(patients.Entry), study.ID)
 			results = append(results, result)
 			continue
 		}
@@ -134,7 +129,6 @@ func PostRiskAssessments(fhirEndpoint string, studies models.StudyMap, pieCollec
 // Result represents the result (successful or not) of posting REDCap risk assessments to a FHIR server
 type Result struct {
 	StudyID             string
-	MedicalRecordNumber string
 	FHIRPatientID       string
 	RiskAssessmentCount int
 	Error               error
@@ -148,13 +142,11 @@ func (r *Result) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(&struct {
 		StudyID             string `json:"studyID,omitempty"`
-		MedicalRecordNumber string `json:"medicalRecordNumber,omitempty"`
 		FHIRPatientID       string `json:"fhirPatientID,omitempty"`
 		RiskAssessmentCount int    `json:"riskAssessmentCount"`
 		Error               string `json:"error,omitempty"`
 	}{
 		StudyID:             r.StudyID,
-		MedicalRecordNumber: r.MedicalRecordNumber,
 		FHIRPatientID:       r.FHIRPatientID,
 		RiskAssessmentCount: r.RiskAssessmentCount,
 		Error:               errString,

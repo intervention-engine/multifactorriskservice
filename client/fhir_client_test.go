@@ -102,20 +102,18 @@ func (suite *FHIRClientSuite) TestPostRiskAssessments() {
 
 	// Post the studies as risk assessments
 	piesCollection := suite.Database.C("pies")
-	results := PostRiskAssessments(suite.Server.URL, suite.Studies, piesCollection, suite.Server.URL+"/pies", false)
+	results := PostRiskAssessments(suite.Server.URL, suite.Studies, piesCollection, suite.Server.URL+"/pies")
 	assert.Len(results, 2)
 
 	// Check the results
 	assert.Contains(results, Result{
 		StudyID:             "1",
-		MedicalRecordNumber: "1-1",
 		FHIRPatientID:       "56fd63cdac1c5d77f6f695a1",
 		RiskAssessmentCount: 2,
 		Error:               nil,
 	})
 	assert.Contains(results, Result{
 		StudyID:             "a",
-		MedicalRecordNumber: "1-a",
 		FHIRPatientID:       "56fd63cdac1c5d77f6f695a2",
 		RiskAssessmentCount: 1,
 		Error:               nil,
@@ -146,33 +144,31 @@ func (suite *FHIRClientSuite) TestPostRiskAssessments() {
 	suite.checkPie(&ras[2], "56fd63cdac1c5d77f6f695a1", 3, 2, 1, 4)
 }
 
-func (suite *FHIRClientSuite) TestPostRiskAssessmentsWithUnfoundMRN() {
+func (suite *FHIRClientSuite) TestPostRiskAssessmentsWithUnfoundStudyID() {
 	require := suite.Require()
 	assert := suite.Assert()
 
-	// Change one of the MRNs so it isn't found on the FHIR server
-	suite.Studies["a"].MedicalRecordNumber = "FOO"
-	suite.Studies["a"].Records[0].MedicalRecordNumber = "FOO"
+	// Change one of the StudyIDs so it isn't found on the FHIR server
+	suite.Studies["a"].ID = "FOO"
+	suite.Studies["a"].Records[0].StudyID = "FOO"
 
 	// Post the studies as risk assessments
 	piesCollection := suite.Database.C("pies")
-	results := PostRiskAssessments(suite.Server.URL, suite.Studies, piesCollection, suite.Server.URL+"/pies", false)
+	results := PostRiskAssessments(suite.Server.URL, suite.Studies, piesCollection, suite.Server.URL+"/pies")
 	assert.Len(results, 2)
 
 	// Check the results
 	assert.Contains(results, Result{
 		StudyID:             "1",
-		MedicalRecordNumber: "1-1",
 		FHIRPatientID:       "56fd63cdac1c5d77f6f695a1",
 		RiskAssessmentCount: 2,
 		Error:               nil,
 	})
 	assert.Contains(results, Result{
-		StudyID:             "a",
-		MedicalRecordNumber: "FOO",
+		StudyID:             "FOO",
 		FHIRPatientID:       "",
 		RiskAssessmentCount: 0,
-		Error:               errors.New("Couldn't find patient with MRN FOO for Study ID a"),
+		Error:               errors.New("Couldn't find patient with Study ID FOO"),
 	})
 
 	// Check we have the right number of risk assessments

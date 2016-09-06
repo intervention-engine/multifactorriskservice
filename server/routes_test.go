@@ -75,7 +75,7 @@ func (suite *RoutesSuite) SetupTest() {
 
 	e := gin.New()
 	suite.Server = httptest.NewServer(e)
-	RegisterRoutes(e, suite.FHIRServer.URL, suite.REDCapServer.URL, "123abc", suite.Database.C("pies"), suite.Server.URL+"/pies/", false)
+	RegisterRoutes(e, suite.FHIRServer.URL, suite.REDCapServer.URL, "123abc", suite.Database.C("pies"), suite.Server.URL+"/pies/")
 }
 
 func (suite *RoutesSuite) TearDownTest() {
@@ -121,14 +121,12 @@ func (suite *RoutesSuite) TestRefresh() {
 	assert.Len(results, 2)
 	assert.Contains(results, client.Result{
 		StudyID:             "1",
-		MedicalRecordNumber: "1-1",
 		FHIRPatientID:       "56fd63cdac1c5d77f6f695a1",
 		RiskAssessmentCount: 2,
 		Error:               nil,
 	})
 	assert.Contains(results, client.Result{
 		StudyID:             "a",
-		MedicalRecordNumber: "1-a",
 		FHIRPatientID:       "56fd63cdac1c5d77f6f695a2",
 		RiskAssessmentCount: 1,
 		Error:               nil,

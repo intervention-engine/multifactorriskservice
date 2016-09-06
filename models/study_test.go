@@ -38,31 +38,11 @@ func (suite *StudySuite) TestAddOneRecord() {
 	err := study.AddRecord(suite.Records[0])
 	assert.NoError(err)
 	assert.Equal("1", study.ID)
-	assert.Equal("1-1", study.MedicalRecordNumber)
 	assert.Len(study.Records, 1)
 	assert.Equal(suite.Records[0], study.Records[0])
 }
 
-func (suite *StudySuite) TestAddSecondRecordWithoutMRN() {
-	assert := suite.Assert()
-
-	study := new(Study)
-
-	// Add first record
-	err := study.AddRecord(suite.Records[0])
-	assert.NoError(err)
-
-	// Add second record
-	err = study.AddRecord(suite.Records[1])
-	assert.NoError(err)
-	assert.Equal("1", study.ID)
-	assert.Equal("1-1", study.MedicalRecordNumber)
-	assert.Len(study.Records, 2)
-	assert.Equal(suite.Records[0], study.Records[0])
-	assert.Equal(suite.Records[1], study.Records[1])
-}
-
-func (suite *StudySuite) TestAddSecondRecordWithMatchingMRN() {
+func (suite *StudySuite) TestTwoRecords() {
 	assert := suite.Assert()
 
 	study := new(Study)
@@ -73,32 +53,8 @@ func (suite *StudySuite) TestAddSecondRecordWithMatchingMRN() {
 
 	// Add second record
 	second := suite.Records[1]
-	second.MedicalRecordNumber = "1-1"
 	err = study.AddRecord(second)
 	assert.NoError(err)
-}
-
-func (suite *StudySuite) TestAddRecordWithoutMRNFirst() {
-	assert := suite.Assert()
-
-	study := new(Study)
-
-	// Add second record first since it doesn't have an MRN
-	err := study.AddRecord(suite.Records[1])
-	assert.NoError(err)
-	assert.Equal("1", study.ID)
-	assert.Empty(study.MedicalRecordNumber)
-	assert.Len(study.Records, 1)
-	assert.Equal(suite.Records[1], study.Records[0])
-
-	// Then add first record with MRN
-	err = study.AddRecord(suite.Records[0])
-	assert.NoError(err)
-	assert.Equal("1", study.ID)
-	assert.Equal("1-1", study.MedicalRecordNumber)
-	assert.Len(study.Records, 2)
-	assert.Equal(suite.Records[1], study.Records[0])
-	assert.Equal(suite.Records[0], study.Records[1])
 }
 
 func (suite *StudySuite) TestAddSecondRecordWithNonMatchingStudyID() {
@@ -113,22 +69,6 @@ func (suite *StudySuite) TestAddSecondRecordWithNonMatchingStudyID() {
 	// Add second record
 	second := suite.Records[1]
 	second.StudyID = 2
-	err = study.AddRecord(second)
-	assert.Error(err)
-}
-
-func (suite *StudySuite) TestAddSecondRecordWithNonMatchingMRN() {
-	assert := suite.Assert()
-
-	study := new(Study)
-
-	// Add first record
-	err := study.AddRecord(suite.Records[0])
-	assert.NoError(err)
-
-	// Add second record
-	second := suite.Records[1]
-	second.MedicalRecordNumber = "1-2"
 	err = study.AddRecord(second)
 	assert.Error(err)
 }
@@ -184,7 +124,7 @@ func (suite *StudySuite) TestToRiskServiceCalculationResultsIgnoresIncompletes()
 	study := new(Study)
 	study.AddRecord(suite.Records[0])
 	incomplete := suite.Records[1]
-	incomplete.RiskFactorsComplete = ""
+	incomplete.FunctionalRisk = ""
 	study.AddRecord(incomplete)
 	assert.Len(study.Records, 2)
 	results := study.ToRiskServiceCalculationResults("http://fhir/Patient/1")
@@ -208,7 +148,6 @@ func (suite *StudySuite) TestStudyMapAddRecord() {
 	s, ok := m["1"]
 	require.True(ok)
 	assert.Equal("1", s.ID)
-	assert.Equal("1-1", s.MedicalRecordNumber)
 	require.Len(s.Records, 1)
 	assert.Equal(suite.Records[0], s.Records[0])
 
@@ -227,7 +166,6 @@ func (suite *StudySuite) TestStudyMapAddRecords() {
 	s, ok := m["1"]
 	require.True(ok)
 	assert.Equal("1", s.ID)
-	assert.Equal("1-1", s.MedicalRecordNumber)
 	require.Len(s.Records, 2)
 	assert.Equal(suite.Records[0], s.Records[0])
 	assert.Equal(suite.Records[1], s.Records[1])
@@ -235,7 +173,6 @@ func (suite *StudySuite) TestStudyMapAddRecords() {
 	s, ok = m["a"]
 	require.True(ok)
 	assert.Equal("a", s.ID)
-	assert.Equal("1-a", s.MedicalRecordNumber)
 	require.Len(s.Records, 1)
 	assert.Equal(suite.Records[2], s.Records[0])
 }

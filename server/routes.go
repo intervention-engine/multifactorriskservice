@@ -11,9 +11,9 @@ import (
 )
 
 // RegisterRoutes sets up the http request handlers with Gin
-func RegisterRoutes(e *gin.Engine, fhirEndpoint, redcapEndpoint, redcapToken string, pieCollection *mgo.Collection, basisPieURL string, useStudyID bool) {
+func RegisterRoutes(e *gin.Engine, fhirEndpoint, redcapEndpoint, redcapToken string, pieCollection *mgo.Collection, basisPieURL string) {
 	RegisterPieHandler(e, pieCollection)
-	RegisterRefreshHandler(e, fhirEndpoint, redcapEndpoint, redcapToken, pieCollection, basisPieURL, useStudyID)
+	RegisterRefreshHandler(e, fhirEndpoint, redcapEndpoint, redcapToken, pieCollection, basisPieURL)
 }
 
 // RegisterPieHandler registers the handler to return pies from the database
@@ -36,9 +36,9 @@ func RegisterPieHandler(e *gin.Engine, pieCollection *mgo.Collection) {
 }
 
 // RegisterRefreshHandler registers the handler to refresh risk assessments from REDCap
-func RegisterRefreshHandler(e *gin.Engine, fhirEndpoint, redcapEndpoint, redcapToken string, pieCollection *mgo.Collection, basisPieURL string, useStudyID bool) {
+func RegisterRefreshHandler(e *gin.Engine, fhirEndpoint, redcapEndpoint, redcapToken string, pieCollection *mgo.Collection, basisPieURL string) {
 	e.POST("/refresh", func(c *gin.Context) {
-		results, err := client.RefreshRiskAssessments(fhirEndpoint, redcapEndpoint, redcapToken, pieCollection, basisPieURL, useStudyID)
+		results, err := client.RefreshRiskAssessments(fhirEndpoint, redcapEndpoint, redcapToken, pieCollection, basisPieURL)
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, err)
 			return

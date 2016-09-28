@@ -38,17 +38,21 @@ $ go build
 
 The above commands do not need to be run again unless you make (or download) changes to the *multifactorriskservice* source code.
 
-The `mock` executable requires a `-fhir` argument to indicate the URL of the FHIR API server and an optional `-gen` argument to indicate that mock assessments should be generated immediately:
+The `mock` executable requires a `confirm-mock` argument, a `-fhir` argument to indicate the URL of the FHIR API server, and an optional `-gen` argument to indicate that mock assessments should be generated immediately.  Note that the `-confirm-mock` argument exists as a safety measure to ensure that the user really intends to generate fake data.
 
 ```
-$ ./mock -fhir http://localhost:3001 -gen
+$ ./mock -confirm-mock -fhir http://localhost:3001 -gen
 ```
 
 If the `-gen` flag is not passed, mock assessments will not be generated and the service will simply serve the existing mock assessment data.
 
-To trigger a generation (or refresh) of the mock assessments at any time, issue an HTTP GET to [http://localhost:9000/refresh](http://localhost:9000/refresh).
+To trigger a generation (or refresh) of the mock assessments at any time, issue an HTTP POST to [http://localhost:9000/refresh](http://localhost:9000/refresh).
 
-The mocker server accepts connections on port 9000 by default.
+```
+curl -X POST http://localhost:9000/refresh
+```
+
+The mock server accepts connections on port 9000 by default.
 
 License
 -------

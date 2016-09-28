@@ -24,11 +24,20 @@ import (
 )
 
 func main() {
+	confirmFlag := flag.Bool("confirm-mock", false, "Flag to confirm you want mock data.  This MUST be set (to prevent accidental use of mock).")
 	httpFlag := flag.String("http", "", "HTTP service address to listen on (env: HTTP_HOST_AND_PORT, default: \":9000\")")
 	mongoFlag := flag.String("mongo", "", "MongoDB address (env: MONGO_URL, default: \"mongodb://localhost:27017\")")
 	fhirFlag := flag.String("fhir", "", "FHIR API address (env: FHIR_URL, default: \"http://localhost:3001\")")
 	genFlag := flag.Bool("gen", false, "Flag to indicate that mock risk assessments should be generated immediately")
 	flag.Parse()
+
+	if !(*confirmFlag) {
+		fmt.Fprintln(os.Stderr, "Mock data can be dangerous if accidentally used in a production environment.  This WILL update the database with fake data.")
+		fmt.Fprintln(os.Stderr, "\nYou MUST confirm that you want to use mock data by passing the '-confirm-mock' flag!")
+		os.Exit(1)
+	} else {
+		fmt.Println("!!! WARNING: MOCK risk service is running.  This produces and stores FAKE data. !!!")
+	}
 
 	httpa := getConfigValue(httpFlag, "HTTP_HOST_AND_PORT", ":9000")
 	mongo := getConfigValue(mongoFlag, "MONGO_URL", "mongodb://localhost:27017")
@@ -106,8 +115,8 @@ func RefreshMockRiskAssessments(fhirEndpoint string, pieCollection *mgo.Collecti
 	for id, sum := range pMap {
 		study := sum.ToStudy()
 		result := client.Result{
-			StudyID:             study.ID,
-			FHIRPatientID:       id,
+			StudyID:       study.ID,
+			FHIRPatientID: id,
 		}
 		calcResults := study.ToRiskServiceCalculationResults(fhirEndpoint + "/Patient/" + id)
 		err = service.UpdateRiskAssessmentsAndPies(fhirEndpoint, id, calcResults, pieCollection, basisPieURL, client.REDCapRiskServiceConfig)

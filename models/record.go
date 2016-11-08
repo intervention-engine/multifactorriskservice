@@ -38,7 +38,7 @@ func (r *Record) RiskFactorDateTime() (time.Time, error) {
 // set, and that all risk factor scores are set
 func (r *Record) IsRiskFactorsComplete() bool {
 	return r.RiskFactorDate != "" && r.ClinicalRisk != "" && r.FunctionalRisk != "" &&
-		r.PsychosocialRisk != "" && r.UtilizationRisk != "" && r.PerceivedRisk != ""
+		r.PsychosocialRisk != "" && r.UtilizationRisk != ""
 }
 
 // ToPie converts the record to the Intervention Engine pie format used for identifying risk components.  The

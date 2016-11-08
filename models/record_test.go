@@ -34,34 +34,34 @@ func (suite *RecordSuite) TestLoadRecordsFromJSON() {
 	assert := suite.Assert()
 	assert.Len(suite.Records, 3)
 	assert.Equal(Record{
-		StudyID:             float64(1),
-		EventName:           "initial_arm_1",
-		RiskFactorDate:      "2015-12-07",
-		ClinicalRisk:        "3",
-		FunctionalRisk:      "2",
-		PsychosocialRisk:    "1",
-		UtilizationRisk:     "3",
-		PerceivedRisk:       "3",
+		StudyID:          float64(1),
+		EventName:        "initial_arm_1",
+		RiskFactorDate:   "2015-12-07",
+		ClinicalRisk:     "3",
+		FunctionalRisk:   "2",
+		PsychosocialRisk: "1",
+		UtilizationRisk:  "3",
+		PerceivedRisk:    "3",
 	}, suite.Records[0])
 	assert.Equal(Record{
-		StudyID:             float64(1),
-		EventName:           "visit1_arm_1",
-		RiskFactorDate:      "2016-04-01",
-		ClinicalRisk:        "3",
-		FunctionalRisk:      "2",
-		PsychosocialRisk:    "1",
-		UtilizationRisk:     "4",
-		PerceivedRisk:       "4",
+		StudyID:          float64(1),
+		EventName:        "visit1_arm_1",
+		RiskFactorDate:   "2016-04-01",
+		ClinicalRisk:     "3",
+		FunctionalRisk:   "2",
+		PsychosocialRisk: "1",
+		UtilizationRisk:  "4",
+		PerceivedRisk:    "4",
 	}, suite.Records[1])
 	assert.Equal(Record{
-		StudyID:             "a",
-		EventName:           "initial_arm_1",
-		RiskFactorDate:      "2016-02-21",
-		ClinicalRisk:        "1",
-		FunctionalRisk:      "1",
-		PsychosocialRisk:    "2",
-		UtilizationRisk:     "1",
-		PerceivedRisk:       "2",
+		StudyID:          "a",
+		EventName:        "initial_arm_1",
+		RiskFactorDate:   "2016-02-21",
+		ClinicalRisk:     "1",
+		FunctionalRisk:   "1",
+		PsychosocialRisk: "2",
+		UtilizationRisk:  "1",
+		PerceivedRisk:    "2",
 	}, suite.Records[2])
 }
 
@@ -110,7 +110,7 @@ func (suite *RecordSuite) TestIsRiskFactorsComplete() {
 
 	record = suite.Records[0]
 	record.PerceivedRisk = ""
-	assert.False(record.IsRiskFactorsComplete(), "Empty PerceivedRisk flag indicates NOT complete")
+	assert.True(record.IsRiskFactorsComplete(), "Empty PerceivedRisk flag should not affect completeness since risk score is now highest of the four factors.")
 }
 
 func (suite *RecordSuite) TestToPie() {
